@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Indexers.Newznab
         public IEnumerable<int> AnimeCategories { get; set; }
 
         [FieldDefinition(5, Label = "Additional Parameters", HelpText = "Additional Newznab parameters", Advanced = true)]
-        public string AdditionalParameters { get; set; }
+        public string AdditionalParameters { get; set; }        public int Priority { get; set; }
 
         // Field 6 is used by TorznabSettings MinimumSeeders
         // If you need to add another field here, update TorznabSettings as well and this comment

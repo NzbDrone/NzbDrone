@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Indexers.Omgwtfnzbs
         public string ApiKey { get; set; }
 
         [FieldDefinition(2, Label = "Delay", HelpText = "Time in minutes to delay new nzbs before they appear on the RSS feed", Advanced = true)]
-        public int Delay { get; set; }
+        public int Delay { get; set; }        public int Priority { get; set; }
 
         public NzbDroneValidationResult Validate()
         {

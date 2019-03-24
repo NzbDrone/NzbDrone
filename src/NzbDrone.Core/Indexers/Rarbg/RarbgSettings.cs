@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Indexers.Rarbg
         {
             BaseUrl = "https://torrentapi.org";
             RankedOnly = false;
-            MinimumSeeders = IndexerDefaults.MINIMUM_SEEDERS;
+            MinimumSeeders = IndexerDefaults.MINIMUM_SEEDERS; 
         }
 
         [FieldDefinition(0, Label = "API URL", HelpText = "URL to Rarbg api, not the website.")]
