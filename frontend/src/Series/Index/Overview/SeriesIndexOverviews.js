@@ -60,7 +60,8 @@ class SeriesIndexOverviews extends Component {
       columnCount: 1,
       posterWidth: 162,
       posterHeight: 238,
-      rowHeight: calculateRowHeight(238, null, props.isSmallScreen, {})
+      rowHeight: calculateRowHeight(238, null, props.isSmallScreen, {}),
+      scrollRestored: false
     };
 
     this._grid = null;
@@ -71,12 +72,15 @@ class SeriesIndexOverviews extends Component {
       items,
       sortKey,
       overviewOptions,
+      jumpToCharacter,
+      scrollTop,
       isSmallScreen
     } = this.props;
 
     const {
       width,
-      rowHeight
+      rowHeight,
+      scrollRestored
     } = this.state;
 
     if (prevProps.sortKey !== sortKey ||
@@ -94,6 +98,23 @@ class SeriesIndexOverviews extends Component {
     ) {
       // recomputeGridSize also forces Grid to discard its cache of rendered cells
       this._grid.recomputeGridSize();
+    }
+
+    if (this._grid && scrollTop !== 0 && !scrollRestored) {
+      this.setState({ scrollRestored: true });
+      this._grid.scrollToPosition({ scrollTop });
+    }
+
+    if (jumpToCharacter != null && jumpToCharacter !== prevProps.jumpToCharacter) {
+      const index = getIndexOfFirstCharacter(items, jumpToCharacter);
+
+      if (this._grid && index != null) {
+
+        this._grid.scrollToCell({
+          rowIndex: index,
+          columnIndex: 0
+        });
+      }
     }
   }
 
@@ -188,7 +209,6 @@ class SeriesIndexOverviews extends Component {
     const {
       scroller,
       items,
-      jumpToCharacter,
       isSmallScreen
     } = this.props;
 
@@ -210,24 +230,6 @@ class SeriesIndexOverviews extends Component {
               return <div />;
             }
 
-            let finalScrollTop = scrollTop;
-
-            if (jumpToCharacter != null) {
-              const index = getIndexOfFirstCharacter(items, jumpToCharacter);
-
-              if (index != null) {
-                if (index > 0) {
-                  // Adjust 5px upwards so there is a gap between the bottom
-                  // of the toolbar and top of the poster.
-
-                  finalScrollTop = rowHeight * index - 5;
-                } else {
-                  finalScrollTop = 0;
-                }
-
-              }
-            }
-
             return (
               <div ref={registerChild}>
                 <Grid
@@ -241,7 +243,7 @@ class SeriesIndexOverviews extends Component {
                   rowHeight={rowHeight}
                   width={width}
                   onScroll={onChildScroll}
-                  scrollTop={finalScrollTop}
+                  scrollTop={scrollTop}
                   overscanRowCount={2}
                   cellRenderer={this.cellRenderer}
                   scrollToAlignment={'start'}
@@ -261,6 +263,7 @@ SeriesIndexOverviews.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
   sortKey: PropTypes.string,
   overviewOptions: PropTypes.object.isRequired,
+  scrollTop: PropTypes.number.isRequired,
   jumpToCharacter: PropTypes.string,
   scroller: PropTypes.instanceOf(Element).isRequired,
   showRelativeDates: PropTypes.bool.isRequired,

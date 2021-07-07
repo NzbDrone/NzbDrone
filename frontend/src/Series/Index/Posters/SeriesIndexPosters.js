@@ -101,7 +101,8 @@ class SeriesIndexPosters extends Component {
       columnCount: 1,
       posterWidth: 162,
       posterHeight: 238,
-      rowHeight: calculateRowHeight(238, null, props.isSmallScreen, {})
+      rowHeight: calculateRowHeight(238, null, props.isSmallScreen, {}),
+      scrollRestored: false
     };
 
     this._isInitialized = false;
@@ -114,6 +115,8 @@ class SeriesIndexPosters extends Component {
       items,
       sortKey,
       posterOptions,
+      jumpToCharacter,
+      scrollTop,
       isSmallScreen
     } = this.props;
 
@@ -121,7 +124,8 @@ class SeriesIndexPosters extends Component {
       width,
       columnWidth,
       columnCount,
-      rowHeight
+      rowHeight,
+      scrollRestored
     } = this.state;
 
     if (prevProps.sortKey !== sortKey ||
@@ -137,6 +141,24 @@ class SeriesIndexPosters extends Component {
             hasDifferentItemsOrOrder(prevProps.items, items))) {
       // recomputeGridSize also forces Grid to discard its cache of rendered cells
       this._grid.recomputeGridSize();
+    }
+
+    if (this._grid && scrollTop !== 0 && !scrollRestored) {
+      this.setState({ scrollRestored: true });
+      this._grid.scrollToPosition({ scrollTop });
+    }
+
+    if (jumpToCharacter != null && jumpToCharacter !== prevProps.jumpToCharacter) {
+      const index = getIndexOfFirstCharacter(items, jumpToCharacter);
+
+      if (this._grid && index != null) {
+        const row = Math.floor(index / columnCount);
+
+        this._grid.scrollToCell({
+          rowIndex: row,
+          columnIndex: 0
+        });
+      }
     }
   }
 
@@ -242,7 +264,6 @@ class SeriesIndexPosters extends Component {
     const {
       scroller,
       items,
-      jumpToCharacter,
       isSmallScreen
     } = this.props;
 
@@ -268,18 +289,6 @@ class SeriesIndexPosters extends Component {
               return <div />;
             }
 
-            let finalScrollTop = scrollTop;
-
-            if (jumpToCharacter != null) {
-              const index = getIndexOfFirstCharacter(items, jumpToCharacter);
-
-              if (index != null) {
-                const row = Math.floor(index / columnCount);
-
-                finalScrollTop = rowHeight * row;
-              }
-            }
-
             return (
               <div ref={registerChild}>
                 <Grid
@@ -293,7 +302,7 @@ class SeriesIndexPosters extends Component {
                   rowHeight={rowHeight}
                   width={width}
                   onScroll={onChildScroll}
-                  scrollTop={finalScrollTop}
+                  scrollTop={scrollTop}
                   overscanRowCount={2}
                   cellRenderer={this.cellRenderer}
                   scrollToAlignment={'start'}
@@ -314,6 +323,7 @@ SeriesIndexPosters.propTypes = {
   sortKey: PropTypes.string,
   posterOptions: PropTypes.object.isRequired,
   jumpToCharacter: PropTypes.string,
+  scrollTop: PropTypes.number.isRequired,
   scroller: PropTypes.instanceOf(Element).isRequired,
   showRelativeDates: PropTypes.bool.isRequired,
   shortDateFormat: PropTypes.string.isRequired,

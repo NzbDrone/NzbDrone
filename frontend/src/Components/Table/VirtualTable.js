@@ -7,6 +7,8 @@ import { WindowScroller, Grid } from 'react-virtualized';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import styles from './VirtualTable.css';
 
+const ROW_HEIGHT = 38;
+
 function overscanIndicesGetter(options) {
   const {
     cellCount,
@@ -37,7 +39,8 @@ class VirtualTable extends Component {
     super(props, context);
 
     this.state = {
-      width: 0
+      width: 0,
+      scrollRestored: false
     };
 
     this._grid = null;
@@ -45,16 +48,31 @@ class VirtualTable extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const {
-      items
+      items,
+      scrollIndex,
+      scrollTop
     } = this.props;
 
     const {
-      width
+      width,
+      scrollRestored
     } = this.state;
 
     if (this._grid && (prevState.width !== width || hasDifferentItemsOrOrder(prevProps.items, items))) {
       // recomputeGridSize also forces Grid to discard its cache of rendered cells
       this._grid.recomputeGridSize();
+    }
+
+    if (this._grid && scrollTop !== undefined && scrollTop !== 0 && !scrollRestored) {
+      this.setState({ scrollRestored: true });
+      this._grid.scrollToPosition({ scrollTop });
+    }
+
+    if (scrollIndex != null && scrollIndex !== prevProps.scrollIndex) {
+      this._grid.scrollToCell({
+        rowIndex: scrollIndex,
+        columnIndex: 0
+      });
     }
   }
 
@@ -83,11 +101,10 @@ class VirtualTable extends Component {
       className,
       items,
       scroller,
+      scrollTop: ignored,
       header,
       headerHeight,
       rowRenderer,
-      rowHeight,
-      scrollIndex,
       ...otherProps
     } = this.props;
 
@@ -117,11 +134,6 @@ class VirtualTable extends Component {
           if (!height) {
             return null;
           }
-
-          const finalScrollTop = scrollIndex == null ?
-            scrollTop :
-            scrollIndex * rowHeight;
-
           return (
             <Measure
               whitelist={['width']}
@@ -141,11 +153,11 @@ class VirtualTable extends Component {
                     width={width}
                     height={height}
                     headerHeight={height - headerHeight}
-                    rowHeight={rowHeight}
+                    rowHeight={ROW_HEIGHT}
                     rowCount={items.length}
                     columnCount={1}
                     columnWidth={width}
-                    scrollTop={finalScrollTop}
+                    scrollTop={scrollTop}
                     onScroll={onChildScroll}
                     overscanRowCount={2}
                     cellRenderer={rowRenderer}
@@ -173,6 +185,7 @@ VirtualTable.propTypes = {
   className: PropTypes.string.isRequired,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
   scrollIndex: PropTypes.number,
+  scrollTop: PropTypes.number,
   scroller: PropTypes.instanceOf(Element).isRequired,
   header: PropTypes.node.isRequired,
   headerHeight: PropTypes.number.isRequired,
