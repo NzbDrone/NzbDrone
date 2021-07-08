@@ -43,12 +43,12 @@ namespace NzbDrone.Api.Queue
 
         private object Remove(int id)
         {
-            var blacklist = false;
-            var blacklistQuery = Request.Query.blacklist;
+            var blocklist = false;
+            var blocklistQuery = Request.Query.blocklist;
 
-            if (blacklistQuery.HasValue)
+            if (blocklistQuery.HasValue)
             {
-                blacklist = Convert.ToBoolean(blacklistQuery.Value);
+                blocklist = Convert.ToBoolean(blocklistQuery.Value);
             }
 
             var pendingRelease = _pendingReleaseService.FindPendingQueueItem(id);
@@ -76,7 +76,7 @@ namespace NzbDrone.Api.Queue
 
             downloadClient.RemoveItem(trackedDownload.DownloadItem, true);
 
-            if (blacklist)
+            if (blocklist)
             {
                 _failedDownloadService.MarkAsFailed(trackedDownload.DownloadItem.DownloadId);
             }
