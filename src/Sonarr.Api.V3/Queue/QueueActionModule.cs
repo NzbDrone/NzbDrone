@@ -81,9 +81,9 @@ namespace Sonarr.Api.V3.Queue
         private object Remove(int id)
         {
             var removeFromClient = Request.GetBooleanQueryParameter("removeFromClient", true);
-            var blacklist = Request.GetBooleanQueryParameter("blacklist");
+            var blocklist = Request.GetBooleanQueryParameter("blocklist");
 
-            var trackedDownload = Remove(id, removeFromClient, blacklist);
+            var trackedDownload = Remove(id, removeFromClient, blocklist);
 
             if (trackedDownload != null)
             {
@@ -96,14 +96,14 @@ namespace Sonarr.Api.V3.Queue
         private object Remove()
         {
             var removeFromClient = Request.GetBooleanQueryParameter("removeFromClient", true);
-            var blacklist = Request.GetBooleanQueryParameter("blacklist");
+            var blocklist = Request.GetBooleanQueryParameter("blocklist");
 
             var resource = Request.Body.FromJson<QueueBulkResource>();
             var trackedDownloadIds = new List<string>();
 
             foreach (var id in resource.Ids)
             {
-                var trackedDownload = Remove(id, removeFromClient, blacklist);
+                var trackedDownload = Remove(id, removeFromClient, blocklist);
 
                 if (trackedDownload != null)
                 {
@@ -116,7 +116,7 @@ namespace Sonarr.Api.V3.Queue
             return new object();
         }
 
-        private TrackedDownload Remove(int id, bool removeFromClient, bool blacklist)
+        private TrackedDownload Remove(int id, bool removeFromClient, bool blocklist)
         {
             var pendingRelease = _pendingReleaseService.FindPendingQueueItem(id);
 
@@ -146,12 +146,12 @@ namespace Sonarr.Api.V3.Queue
                 downloadClient.RemoveItem(trackedDownload.DownloadItem, true);
             }
 
-            if (blacklist)
+            if (blocklist)
             {
                 _failedDownloadService.MarkAsFailed(trackedDownload.DownloadItem.DownloadId);
             }
             
-            if (!removeFromClient && !blacklist)
+            if (!removeFromClient && !blocklist)
             {
                 if (!_ignoredDownloadService.IgnoreDownload(trackedDownload))
                 {

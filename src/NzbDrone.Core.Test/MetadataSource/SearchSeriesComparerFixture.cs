@@ -47,23 +47,23 @@ namespace NzbDrone.Core.Test.MetadataSource
         }
 
         [Test]
-        public void should_prefer_blacklist_over_the_blacklist_when_searching_for_blacklist()
+        public void should_prefer_blocklist_over_the_blocklist_when_searching_for_blocklist()
         {
             WithSeries("The Blacklist");
             WithSeries("Blacklist");
 
-            _series.Sort(new SearchSeriesComparer("blacklist"));
+            _series.Sort(new SearchSeriesComparer("blocklist"));
 
             _series.First().Title.Should().Be("Blacklist");
         }
 
         [Test]
-        public void should_prefer_the_blacklist_over_blacklist_when_searching_for_the_blacklist()
+        public void should_prefer_the_blocklist_over_blocklist_when_searching_for_the_blocklist()
         {
             WithSeries("Blacklist");
             WithSeries("The Blacklist");
 
-            _series.Sort(new SearchSeriesComparer("the blacklist"));
+            _series.Sort(new SearchSeriesComparer("the blocklist"));
 
             _series.First().Title.Should().Be("The Blacklist");
         }
