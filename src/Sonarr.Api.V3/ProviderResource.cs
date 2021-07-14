@@ -38,8 +38,9 @@ namespace Sonarr.Api.V3
                 Message = definition.Message,
                 Tags = definition.Tags,
                 Fields = SchemaBuilder.ToSchema(definition.Settings),
-
-                InfoLink = string.Format("https://wiki.servarr.com/Sonarr_Supported_{0}",
+                
+                //sonarrFixed: Provider Wiki Links (supported-X => supported#X)/supported is an disambagation page. the # should be a header on the page with appropiate details/link
+                InfoLink = string.Format("https://wiki.servarr.com/sonarr/supported#{0}",
                     typeof(TProviderResource).Name.Replace("Resource", "s"),
                     definition.Implementation.ToLower())
             };
